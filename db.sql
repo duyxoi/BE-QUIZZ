@@ -169,3 +169,14 @@ VALUES
 
 (3,3,'A',true,1),
 (3,4,'B',true,1);
+
+CREATE TABLE MonHoc (
+    monhoc_id INT AUTO_INCREMENT PRIMARY KEY,
+    ten_mon NVARCHAR(100) NOT NULL,
+    mo_ta TEXT
+);
+
+-- 2. Thêm cột monhoc_id vào bảng DeThi và tạo liên kết
+ALTER TABLE DeThi ADD COLUMN monhoc_id INT;
+ALTER TABLE DeThi ADD CONSTRAINT fk_dethi_monhoc 
+    FOREIGN KEY (monhoc_id) REFERENCES MonHoc(monhoc_id) ON DELETE SET NULL;
