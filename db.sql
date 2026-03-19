@@ -111,61 +111,14 @@ CREATE TABLE ChiTietBaiLam (
 -- ON DELETE CASCADE 
 -- ON UPDATE CASCADE;
 
-INSERT INTO Users (username, password, full_name, role, email) VALUES
-('teacher1', '123456', 'Nguyen Van A', 'teacher', 'teacher1@gmail.com'),
-('teacher2', '123456', 'Tran Thi B', 'teacher', 'teacher2@gmail.com'),
-('student1', '123456', 'Le Van C', 'student', 'student1@gmail.com'),
-('student2', '123456', 'Pham Thi D', 'student', 'student2@gmail.com'),
-('student3', '123456', 'Hoang Van E', 'student', 'student3@gmail.com');
 
-INSERT INTO GiaoVien (user_id) VALUES
-(1),
-(2);
+CREATE TABLE MonHoc (
+    monhoc_id INT AUTO_INCREMENT PRIMARY KEY,
+    ten_mon NVARCHAR(100) NOT NULL,
+    mo_ta TEXT
+);
 
-INSERT INTO SinhVien (user_id) VALUES
-(3),
-(4),
-(5);
-
-INSERT INTO QuanLyGiaoVienHS (teacher_id, student_id, ngay_bat_dau_hoc) VALUES
-(1,1,'2025-09-01'),
-(1,2,'2025-09-01'),
-(2,3,'2025-09-01');
-
-INSERT INTO DeThi (ten_de, thoi_gian_phut, teacher_id, trang_thai) VALUES
-('De thi Java co ban', 30, 1, 'active'),
-('De thi C++ nang cao', 45, 2, 'active');
-
-INSERT INTO CauHoiChiTiet 
-(dethi_id, noi_dung, loai_cau_hoi, phuong_an_a, phuong_an_b, phuong_an_c, phuong_an_d, dap_an_dung, diem_cau_hoi)
-VALUES
-(1,'Java la ngon ngu gi?','trac_nghiem',
-'OOP','Functional','Procedural','None','A',1),
-
-(1,'Tu khoa dung de ke thua trong Java la gi?','trac_nghiem',
-'implement','extends','inherit','super','B',1),
-
-(2,'Toan tu new trong C++ dung de lam gi?','trac_nghiem',
-'Cap phat bo nho','Giai phong bo nho','Khai bao bien','Khong gi ca','A',1),
-
-(2,'Ham main trong C++ tra ve kieu gi?','trac_nghiem',
-'void','int','float','string','B',1);
-
-INSERT INTO KetQuaThi 
-(student_id, dethi_id, tong_diem, thoi_gian_bat_dau, trang_thai)
-VALUES
-(1,1,2,'2026-03-10 09:00:00','da_nop'),
-(2,1,1,'2026-03-10 09:10:00','da_nop'),
-(3,2,2,'2026-03-10 09:20:00','da_nop');
-
-INSERT INTO ChiTietBaiLam 
-(ketqua_id, cauhoi_id, dap_an_chon, is_correct, diem_dat_duoc)
-VALUES
-(1,1,'A',true,1),
-(1,2,'B',true,1),
-
-(2,1,'A',true,1),
-(2,2,'A',false,0),
-
-(3,3,'A',true,1),
-(3,4,'B',true,1);
+-- 2. Thêm cột monhoc_id vào bảng DeThi và tạo liên kết
+ALTER TABLE DeThi ADD COLUMN monhoc_id INT;
+ALTER TABLE DeThi ADD CONSTRAINT fk_dethi_monhoc 
+    FOREIGN KEY (monhoc_id) REFERENCES MonHoc(monhoc_id) ON DELETE SET NULL;
