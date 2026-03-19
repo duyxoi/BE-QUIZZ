@@ -2,6 +2,8 @@ package nhom8.example.quizz.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
+import nhom8.example.quizz.dto.AssignStudentRequest;
+import nhom8.example.quizz.dto.StudentResponseDTO;
 import nhom8.example.quizz.entity.GiaoVien;
 import nhom8.example.quizz.entity.QuanLyGiaoVienHS;
 import nhom8.example.quizz.entity.SinhVien;
@@ -77,4 +79,41 @@ public class QuanLyGiaoVienHSServiceImpl implements QuanLyGiaoVienHSService {
     public boolean isLinked(Integer teacherId, Integer studentId) {
         return quanLyRepo.findByGiaoVien_TeacherIdAndSinhVien_StudentId(teacherId, studentId).isPresent();
     }
+
+    @Override
+    public List<StudentResponseDTO> getStudentsByTeacher(Integer teacherId) {
+        return quanLyRepo.findByGiaoVien_TeacherId(teacherId).stream()
+                .map(item -> StudentResponseDTO.builder()
+                        .studentId(item.getSinhVien().getStudentId())
+                        .fullName(item.getSinhVien().getUser().getFullName())
+                        .email(item.getSinhVien().getUser().getEmail())
+                        .username(item.getSinhVien().getUser().getUsername())
+                        .ngayBatDauHoc(item.getNgayBatDauHoc().toString())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void addStudentToTeacher(AssignStudentRequest request) {
+        // 1. Kiểm tra tồn tại
+        GiaoVien gv = giaoVienRepo.findById(request.getTeacherId())
+                .orElseThrow(() -> new RuntimeException("Giáo viên không tồn tại"));
+        SinhVien sv = sinhVienRepo.findById(request.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Sinh viên không tồn tại"));
+
+        // 2. Kiểm tra trùng lặp
+        if (quanLyRepo.existsByGiaoVien_TeacherIdAndSinhVien_StudentId(request.getTeacherId(), request.getStudentId())) {
+            throw new RuntimeException("Sinh viên này đã có trong danh sách quản lý!");
+        }
+
+        // 3. Lưu mối quan hệ
+        QuanLyGiaoVienHS link = new QuanLyGiaoVienHS();
+        link.setGiaoVien(gv);
+        link.setSinhVien(sv);
+        link.setNgayBatDauHoc(LocalDate.now()); // Lấy ngày hiện tại
+
+        quanLyRepo.save(link);
+    }
+
 }

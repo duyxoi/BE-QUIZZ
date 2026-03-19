@@ -1,6 +1,7 @@
 package nhom8.example.quizz.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import nhom8.example.quizz.dto.SubmitResponseDTO;
 import nhom8.example.quizz.entity.*;
 import nhom8.example.quizz.repository.*;
 import nhom8.example.quizz.service.KetQuaThiService;
@@ -72,6 +73,11 @@ public class KetQuaThiServiceImpl implements KetQuaThiService {
     }
 
     @Override
+    public void createKetQuaThi(KetQuaThi ketQuaThi) {
+        ketQuaThiRepository.save(ketQuaThi);
+    }
+
+    @Override
     public List<KetQuaThi> getHistoryByStudentId(Integer studentId) {
         return ketQuaThiRepository.findBySinhVien_StudentId(studentId);
     }
@@ -85,5 +91,62 @@ public class KetQuaThiServiceImpl implements KetQuaThiService {
     @Transactional
     public void deleteKetQua(Integer id) {
         ketQuaThiRepository.deleteById(id);
+    }
+
+
+    @Override
+    @Transactional
+    public SubmitResponseDTO chamDiemVaNopBai(Integer ketQuaId) {
+        // 1. Lấy thông tin lượt thi kèm danh sách chi tiết bài làm
+        KetQuaThi ketQua = ketQuaThiRepository.findById(ketQuaId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lượt thi"));
+
+        if (ketQua.getTrangThai() == KetQuaThi.TrangThai.da_nop) {
+            throw new RuntimeException("Bài thi này đã được nộp trước đó!");
+        }
+
+        List<ChiTietBaiLam> listBaiLam = ketQua.getListChiTietBaiLam();
+        int soCauDung = 0;
+        int tongSoCau = ketQua.getDeThi().getListCauHoiChiTiet().size();
+
+        // Giả sử mỗi câu hỏi có điểm riêng (diemCauHoi), nếu không có thì chia đều thang điểm 10
+        float tongDiem = 0;
+
+        // 2. Duyệt qua từng câu sinh viên đã làm
+        for (ChiTietBaiLam chiTiet : listBaiLam) {
+            CauHoiChiTiet cauHoi = chiTiet.getCauHoi();
+
+            // So sánh đáp án (Chỉ tính cho trắc nghiệm)
+            if (cauHoi.getLoaiCauHoi() == CauHoiChiTiet.LoaiCauHoi.trac_nghiem) {
+                if (chiTiet.getDapAnChon() != null &&
+                        chiTiet.getDapAnChon().equalsIgnoreCase(cauHoi.getDapAnDung())) {
+
+                    chiTiet.setIsCorrect(true);
+                    chiTiet.setDiemDatDuoc(cauHoi.getDiemCauHoi());
+                    soCauDung++;
+                } else {
+                    chiTiet.setIsCorrect(false);
+                    chiTiet.setDiemDatDuoc(0f);
+                }
+            }
+            // Với tự luận: isCorrect và diemDatDuoc sẽ để GV chấm sau (mặc định false/0)
+        }
+
+        tongDiem = (float) ((soCauDung*1.0)/tongSoCau *10.0);
+        // 3. Cập nhật trạng thái KetQuaThi
+        ketQua.setTongDiem(tongDiem);
+        ketQua.setTrangThai(KetQuaThi.TrangThai.da_nop);
+        // Lưu ý: Đảm bảo field thoiGianNop trong Entity có thể ghi được (bỏ insertable=false)
+        ketQua.setThoiGianNop(LocalDateTime.now());
+
+        ketQuaThiRepository.save(ketQua);
+
+        return SubmitResponseDTO.builder()
+                .ketQuaId(ketQuaId)
+                .tongDiem(tongDiem)
+                .soCauDung(soCauDung)
+                .tongSoCau(tongSoCau)
+                .thoiGianNop(LocalDateTime.now().toString())
+                .build();
     }
 }

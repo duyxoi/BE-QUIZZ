@@ -1,12 +1,23 @@
 package nhom8.example.quizz.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import nhom8.example.quizz.dto.CreateDeThiRequest;
+import nhom8.example.quizz.dto.ExamResponseDTO;
+import nhom8.example.quizz.dto.SubjectDTO;
+import nhom8.example.quizz.entity.CauHoiChiTiet;
 import nhom8.example.quizz.entity.DeThi;
+import nhom8.example.quizz.entity.GiaoVien;
+import nhom8.example.quizz.entity.MonHoc;
+import nhom8.example.quizz.repository.CauHoiChiTietRepository;
 import nhom8.example.quizz.repository.DeThiRepository;
+import nhom8.example.quizz.repository.GiaoVienRepository;
+import nhom8.example.quizz.repository.MonHocRepository;
 import nhom8.example.quizz.service.DeThiService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +27,10 @@ public class DeThiServiceImpl implements DeThiService {
 
     // Đây là Repository thực thụ kế thừa JpaRepository
     private final DeThiRepository deThiRepository;
+    private MonHocRepository monHocRepository;
+    private GiaoVienRepository giaoVienRepository;
+    private CauHoiChiTietRepository cauHoiChiTietRepository;
+
 
     @Override
     public List<DeThi> getAllDeThi() {
@@ -55,4 +70,63 @@ public class DeThiServiceImpl implements DeThiService {
     public List<DeThi> getDeThiByTeacherId(Integer teacherId) {
         return deThiRepository.findByGiaoVien_TeacherId(teacherId);
     }
+
+    @Override
+    @Transactional
+    public DeThi createFullDeThi(CreateDeThiRequest request) {
+        // 1. Tìm GiaoVien và MonHoc
+        GiaoVien gv = giaoVienRepository.findById(request.getTeacherId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giáo viên"));
+        MonHoc mh = monHocRepository.findById(request.getMonhocId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học"));
+
+        // 2. Lưu Đề thi trước
+        DeThi deThi = new DeThi();
+        deThi.setTenDe(request.getTenDe());
+        deThi.setThoiGianPhut(request.getThoiGianPhut());
+        deThi.setGiaoVien(gv);
+        deThi.setMonHoc(mh);
+        deThi.setTrangThai(DeThi.TrangThai.active);
+        deThi.setNgayTao(LocalDateTime.now());
+
+        DeThi savedDeThi = deThiRepository.save(deThi);
+
+        // 3. Duyệt danh sách câu hỏi và lưu
+        if (request.getQuestions() != null) {
+            for (CreateDeThiRequest.CauHoiDTO qDto : request.getQuestions()) {
+                CauHoiChiTiet cauHoi = new CauHoiChiTiet();
+                cauHoi.setNoiDung(qDto.getNoi_dung());
+                cauHoi.setPhuongAnA(qDto.getPhuong_an_a());
+                cauHoi.setPhuongAnB(qDto.getPhuong_an_b());
+                cauHoi.setPhuongAnC(qDto.getPhuong_an_c());
+                cauHoi.setPhuongAnD(qDto.getPhuong_an_d());
+                cauHoi.setDapAnDung(qDto.getDap_an_dung());
+                cauHoi.setDiemCauHoi(qDto.getDiem_cau_hoi());
+                cauHoi.setLoaiCauHoi(CauHoiChiTiet.LoaiCauHoi.valueOf(qDto.getLoai_cau_hoi()));
+
+                cauHoi.setDeThi(savedDeThi); // Gắn vào đề thi vừa tạo
+                cauHoiChiTietRepository.save(cauHoi);
+            }
+        }
+
+        return savedDeThi;
+    }
+
+    @Override
+    public ExamResponseDTO getExamById(Integer id) {
+        DeThi deThi = deThiRepository.findById(id).orElseThrow(() -> new RuntimeException("Khong tim thay De thi "+id));
+        return ExamResponseDTO.builder()
+                .id(deThi.getDethiId())
+                .title(deThi.getTenDe())
+                .description("Chua co gi")
+                .subject(SubjectDTO.builder()
+                        .id(deThi.getMonHoc().getMonhocId())
+                        .name(deThi.getMonHoc().getTenMon())
+                        .build())
+                .questionCount(deThi.getListCauHoiChiTiet().size())
+                .durationMinutes(deThi.getThoiGianPhut())
+                .build();
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package nhom8.example.quizz.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,11 +32,13 @@ public class DeThi {
     private LocalDateTime ngayTao;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "teacher_id") // Khóa ngoại kết nối bảng GiaoVien
     private GiaoVien giaoVien;
 
     // Quan hệ 1-N với bảng CauHoiChiTiet
     @OneToMany(mappedBy = "deThi", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CauHoiChiTiet> listCauHoiChiTiet;
 
     @Enumerated(EnumType.STRING)
@@ -57,6 +60,11 @@ public class DeThi {
             trangThai = TrangThai.active;
         }
     }
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "monhoc_id") // Tên cột trong Database
+    private MonHoc monHoc;
 
 
     public DeThi(String tenDe, GiaoVien giaoVien, TrangThai trangThai) {

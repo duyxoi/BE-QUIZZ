@@ -1,6 +1,8 @@
 package nhom8.example.quizz.service;
 
 
+import nhom8.example.quizz.dto.AssignStudentRequest;
+import nhom8.example.quizz.dto.StudentResponseDTO;
 import nhom8.example.quizz.entity.QuanLyGiaoVienHS;
 import nhom8.example.quizz.entity.SinhVien;
 import nhom8.example.quizz.entity.GiaoVien;
@@ -22,4 +24,7 @@ public interface QuanLyGiaoVienHSService {
 
     // Kiểm tra xem sinh viên này có thuộc quyền quản lý của giáo viên này không
     boolean isLinked(Integer teacherId, Integer studentId);
+
+    List<StudentResponseDTO> getStudentsByTeacher(Integer teacherId);
+    void addStudentToTeacher(AssignStudentRequest request);
 }

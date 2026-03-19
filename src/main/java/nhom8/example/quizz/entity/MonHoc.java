@@ -1,5 +1,6 @@
 package nhom8.example.quizz.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -23,6 +24,7 @@ public class MonHoc {
     private String moTa;
 
     // Quan hệ 1-N: Một môn học có nhiều đề thi
-    @OneToMany(mappedBy = "monHoc", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "monHoc", fetch = FetchType.LAZY)
+    @JsonIgnore // Jackson sẽ bỏ qua trường này, không bao giờ bị lặp
     private List<DeThi> deThiList;
 }

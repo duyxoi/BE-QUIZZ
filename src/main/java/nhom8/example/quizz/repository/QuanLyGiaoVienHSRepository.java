@@ -12,4 +12,9 @@ public interface QuanLyGiaoVienHSRepository extends JpaRepository<QuanLyGiaoVien
     List<QuanLyGiaoVienHS> findByGiaoVien_TeacherId(Integer teacherId);
     List<QuanLyGiaoVienHS> findBySinhVien_StudentId(Integer studentId);
     Optional<QuanLyGiaoVienHS> findByGiaoVien_TeacherIdAndSinhVien_StudentId(Integer teacherId, Integer studentId);
+
+
+    // Kiểm tra xem học sinh đã được gán cho giáo viên này chưa
+    boolean existsByGiaoVien_TeacherIdAndSinhVien_StudentId(Integer teacherId, Integer studentId);
+
 }

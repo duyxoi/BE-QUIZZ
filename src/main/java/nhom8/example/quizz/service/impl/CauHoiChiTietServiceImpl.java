@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +42,10 @@ public class CauHoiChiTietServiceImpl implements CauHoiChiTietService {
     public void updateCauHoiChiTiet(CauHoiChiTiet cauHoiChiTiet) {
         // JPA tự động hiểu là Update nếu thực thể đã có ID tồn tại
         repository.save(cauHoiChiTiet);
+    }
+
+    @Override
+    public Optional<CauHoiChiTiet> getCauHoiChiTietById(int cauhoiId) {
+        return  repository.findById(cauhoiId);
     }
 }

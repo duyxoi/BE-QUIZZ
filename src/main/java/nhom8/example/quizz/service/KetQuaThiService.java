@@ -1,6 +1,7 @@
 package nhom8.example.quizz.service;
 
 
+import nhom8.example.quizz.dto.SubmitResponseDTO;
 import nhom8.example.quizz.entity.ChiTietBaiLam;
 import nhom8.example.quizz.entity.KetQuaThi;
 import java.util.List;
@@ -12,6 +13,9 @@ public interface KetQuaThiService {
 
     Optional<KetQuaThi> getKetQuaById(Integer id);
 
+    void createKetQuaThi(KetQuaThi ketQuaThi);
+
+    public SubmitResponseDTO chamDiemVaNopBai(Integer ketQuaId);
     // Lấy lịch sử thi của một sinh viên
     List<KetQuaThi> getHistoryByStudentId(Integer studentId);
 
