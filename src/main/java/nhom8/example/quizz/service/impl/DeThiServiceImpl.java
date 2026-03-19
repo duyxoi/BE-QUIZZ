@@ -26,10 +26,12 @@ import java.util.Optional;
 public class DeThiServiceImpl implements DeThiService {
 
     // Đây là Repository thực thụ kế thừa JpaRepository
+
+
     private final DeThiRepository deThiRepository;
-    private MonHocRepository monHocRepository;
-    private GiaoVienRepository giaoVienRepository;
-    private CauHoiChiTietRepository cauHoiChiTietRepository;
+    private final MonHocRepository monHocRepository;
+    private final GiaoVienRepository giaoVienRepository;
+    private final CauHoiChiTietRepository cauHoiChiTietRepository;
 
 
     @Override

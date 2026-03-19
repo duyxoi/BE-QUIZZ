@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nhom8.example.quizz.entity.User;
 
 @Data
 @Builder
@@ -16,4 +17,15 @@ public class UserResponseDTO {
     private String email;
     private String role;
     private String createdAt; // Format lại thành chuỗi DD/MM/YYYY cho dễ đọc
+
+
+    public static UserResponseDTO fromEntity(User user) {
+        return UserResponseDTO.builder()
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole().name()) // Chuyển Enum sang String
+                .build();
+    }
 }

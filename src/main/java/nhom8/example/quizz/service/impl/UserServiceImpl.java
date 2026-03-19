@@ -9,9 +9,11 @@ import nhom8.example.quizz.repository.UserRepository;
 import nhom8.example.quizz.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +23,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder; // Sẽ cấu hình ở bước 3
 
     @Override
     public List<User> getAllUsers() {
@@ -48,6 +51,9 @@ public class UserServiceImpl implements UserService {
     public User saveUser(User user) {
         // Ở đây bạn có thể thêm logic mã hóa mật khẩu (BCrypt)
         // trước khi lưu vào database nếu có Spring Security
+        // Mã hóa mật khẩu
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setCreatedAt(LocalDateTime.now());
         return userRepository.save(user);
     }
 

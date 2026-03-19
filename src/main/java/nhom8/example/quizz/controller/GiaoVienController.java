@@ -36,7 +36,7 @@ public class GiaoVienController {
         try {
             DeThi result = deThiService.createFullDeThi(request);
             return ResponseEntity.ok("Tạo đề thi thành công! ID: " + result.getDethiId());
-        } catch (Exception e) {
+        } catch (Exception e) { 
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
